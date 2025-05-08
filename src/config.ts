@@ -16,6 +16,8 @@ export interface OpenAPIMCPServerConfig {
     openApiSpec: OpenAPIV3.Document | string;
     /** API 请求头 */
     headers?: Record<string, string>;
+    //启动方式
+    mode: string
 }
 
 /**
@@ -45,6 +47,10 @@ export class ConfigLoader {
                 type: "string",
                 description: "API headers in format 'key1:value1,key2:value2'"
             })
+            .option("mode",{
+                type: "string",
+                description: "Mode for mcp start:stdio or http."
+            })
             .help()
             .parseSync();
 
@@ -64,12 +70,14 @@ export class ConfigLoader {
         const name = args.name as string || process.env.SERVER_NAME || "mcp-openapi-server";
         const apiBaseUrl = args["api-base-url"] as string || process.env.API_BASE_URL || "http://localhost:8080";
         const openApiSpec = args["openapi-spec"] as string || process.env.OPENAPI_SPEC || "./openapi.json";
+        const mode = args["mode"] as string || "stdio";
 
         return {
             name,
             apiBaseUrl,
             openApiSpec,
-            headers: Object.keys(headers).length > 0 ? headers : {}
+            headers: Object.keys(headers).length > 0 ? headers : {},
+            mode,
         };
     }
 
@@ -103,7 +111,8 @@ export class ConfigLoader {
             name: "mcp-openapi-server",
             apiBaseUrl: "http://localhost:8080",
             openApiSpec: "./openapi.json",
-            headers: {}
+            headers: {},
+            mode: "stdio",
         };
     }
 }

@@ -28,6 +28,10 @@ export class ConfigLoader {
             type: "string",
             description: "API headers in format 'key1:value1,key2:value2'"
         })
+            .option("mode", {
+            type: "string",
+            description: "Mode for mcp start:stdio or http."
+        })
             .help()
             .parseSync();
         // 解析头信息
@@ -45,11 +49,13 @@ export class ConfigLoader {
         const name = args.name || process.env.SERVER_NAME || "mcp-openapi-server";
         const apiBaseUrl = args["api-base-url"] || process.env.API_BASE_URL || "http://localhost:8080";
         const openApiSpec = args["openapi-spec"] || process.env.OPENAPI_SPEC || "./openapi.json";
+        const mode = args["mode"] || "stdio";
         return {
             name,
             apiBaseUrl,
             openApiSpec,
-            headers: Object.keys(headers).length > 0 ? headers : {}
+            headers: Object.keys(headers).length > 0 ? headers : {},
+            mode,
         };
     }
     /**
@@ -80,7 +86,8 @@ export class ConfigLoader {
             name: "mcp-openapi-server",
             apiBaseUrl: "http://localhost:8080",
             openApiSpec: "./openapi.json",
-            headers: {}
+            headers: {},
+            mode: "stdio",
         };
     }
 }
