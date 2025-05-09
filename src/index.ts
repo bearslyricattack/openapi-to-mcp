@@ -54,7 +54,7 @@ if (config.mode == "http"){
         }
       };
       const server = new McpServer({
-        name: "example-server",
+        name: config.name,
         version: "1.0.0"
       });
       tools.forEach((tool, id) => {
@@ -117,7 +117,7 @@ if (config.mode == "http"){
 
 if (config.mode == "stdio"){
   const server = new McpServer({
-    name: "example-server",
+    name: config.name,
     version: "1.0.0"
   });
 
