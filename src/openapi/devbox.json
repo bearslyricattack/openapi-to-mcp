@@ -1,376 +1,128 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Devbox API",
-    "version": "1.0.0",
-    "description": ""
+    "title": "日志查询 API",
+    "description": "用于从 vlogs 中查询日志和日志条目的 API",
+    "version": "1.0.0"
   },
   "paths": {
-    "/api/v1/createSimpleDevbox": {
-      "get": {
-        "description": "New endpoint",
-        "responses": {
-          "200": {
-            "description": "New response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "": ""
-                }
-              }
-            }
-          }
-        }
-      },
+    "/queryLogsByParams": {
       "post": {
-        "tags": [
-          "Lifecycle"
-        ],
-        "summary": "创建devbox",
-        "description": "创建devbox",
+        "summary": "根据参数查询日志以及条目",
+        "description": "此接口用于根据指定的参数条件从vlogs中查询日志数据。",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "devboxForm": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "description": "Devbox 名称"
-                      },
-                      "runtimeName": {
-                        "type": "string",
-                        "enum": [
-                          "Debian",
-                          "C++",
-                          "Rust",
-                          "Java",
-                          "Go",
-                          "Python",
-                          "Node.js",
-                          ".Net",
-                          "C",
-                          "PHP"
-                        ],
-                        "description": "devbox 类型，有以下可选项：Debian，C++，Rust，Java，Go，Python，Node.js，.Net，C，PHP"
-                      },
-                      "cpu": {
-                        "type": "number",
-                        "minimum": 0,
-                        "default": 2000,
-                        "description": "CPU核心数, 使用1000，2000的格式,代表1Core, 2Core"
-                      },
-                      "memory": {
-                        "type": "number",
-                        "minimum": 0,
-                        "default": 4096,
-                        "description": "内存数, 使用2048, 4096,代表2G, 4G"
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "runtimeName"
-                    ]
-                  }
-                },
                 "required": [
-                  "devboxForm"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/releaseDevboxDefault": {
-      "post": {
-        "tags": [
-          "ReleaseAndDeploy"
-        ],
-        "summary": "Devbox 发版",
-        "description": "Devbox 发版",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
+                  "time",
+                  "namespace",
+                  "app",
+                  "limit",
+                  "jsonMode",
+                  "stderrMode",
+                  "numberMode",
+                  "pod",
+                  "container",
+                  "keyword",
+                  "jsonQuery"
+                ],
                 "properties": {
-                  "devboxForm": {
-                    "type": "object",
-                    "properties": {
-                      "devboxName": {
-                        "type": "string",
-                        "minLength": 1,
-                        "description": "Devbox 名称"
-                      },
-                      "tag": {
-                        "type": "string",
-                        "minLength": 1,
-                        "description": "版本号"
-                      },
-                      "releaseDes": {
-                        "type": "string",
-                        "default": "",
-                        "description": "版本描述"
-                      }
-                    },
-                    "required": [
-                      "devboxName",
-                      "tag"
-                    ]
-                  }
-                },
-                "required": [
-                  "devboxForm"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/getDevboxReleaseListDefault": {
-      "get": {
-        "tags": [
-          "ReleaseAndDeploy"
-        ],
-        "summary": "获取Devbox版本历史",
-        "description": "获取Devbox版本历史",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "devboxName",
-            "description": "Devbox 名称",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Devbox 名称"
-            },
-            "required": true
-          }
-        ]
-      }
-    },
-    "/api/v1/lifecycleDevbox": {
-      "post": {
-        "tags": [
-          "Lifecycle"
-        ],
-        "summary": "操作devbox",
-        "description": "操作devbox，主要包含开机，关机，重启，冷关机",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "devboxName": {
+                  "time": {
                     "type": "string",
-                    "minLength": 1,
-                    "description": "Devbox名称"
+                    "description": "查询的时间范围，例如：1h 表示过去1小时，支持类似 1m, 1d 的格式",
+                    "example": "30d"
                   },
-                  "action": {
+                  "namespace": {
                     "type": "string",
-                    "enum": [
-                      "start",
-                      "stop",
-                      "restart",
-                      "shutdown"
-                    ],
-                    "description": "操作方式：start为开机，stop为关机，restart为重启，shutdown为冷关机"
-                  }
-                },
-                "required": [
-                  "devboxName",
-                  "action"
-                ]
-              }
-            }
-          }
-        },
-        "/api/releaseAndDeployDevbox": {
-          "post": {
-            "tags": [
-              "ReleaseAndDeploy"
-            ],
-            "summary": "ReleaseAndDeploy and deploy a devbox",
-            "description": "Create a new release for a devbox and deploy it with specific resource configuration,you need to shutdown the devbox before releasing it",
-            "requestBody": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "devboxName": {
-                        "type": "string",
-                        "description": "Devbox name"
-                      },
-                      "tag": {
-                        "type": "string",
-                        "description": "Release tag"
-                      },
-                      "releaseDes": {
-                        "type": "string",
-                        "description": "Release description"
-                      },
-                      "devboxUid": {
-                        "type": "string",
-                        "description": "Devbox UID"
-                      },
-                      "cpu": {
-                        "type": "number",
-                        "default": 2000,
-                        "description": "CPU cores, it is recommended to use options like 1000, 2000, 4000, 8000, 16000, representing 1Core, 2Core, 4Core, 8Core, 16Core"
-                      },
-                      "memory": {
-                        "type": "number",
-                        "default": 4096,
-                        "description": "Memory in MB"
+                    "description": "查询的命名空间名称，例如：kube-system",
+                    "example": "sealos"
+                  },
+                  "app": {
+                    "type": "string",
+                    "description": "查询的app",
+                    "example": ""
+                  },
+                  "limit": {
+                    "type": "string",
+                    "description": "返回的日志条数限制，默认值为 10",
+                    "example": "1"
+                  },
+                  "jsonMode": {
+                    "type": "string",
+                    "description": "是否开启Json模式 true则开启，false则不开启",
+                    "enum": ["true", "false"],
+                    "example": "true"
+                  },
+                  "stderrMode": {
+                    "type": "string",
+                    "description": "是否只查看stderr，true则开启只查看，false则不开启只查看",
+                    "enum": ["true", "false"],
+                    "example": "false"
+                  },
+                  "numberMode": {
+                    "type": "string",
+                    "description": "是否查询日志条目，true则查看，false则不查看，即查询日志内容，当启用这个参数时，limit参数将不发挥作用。",
+                    "enum": ["true", "false"],
+                    "example": "false"
+                  },
+                  "numberLevel": {
+                    "type": "string",
+                    "description": "查询日志条目的层级，值为m，h，d等 表示日志条目展示的等级，例如传h则表示返回每个小时日志的条目 不过不查询日志等级则传空",
+                    "example": ""
+                  },
+                  "pod": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "需要查询的Pod，传空则查询全部Pod",
+                    "example": []
+                  },
+                  "container": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "需要查询的Container，传空则查询全部Container",
+                    "example": []
+                  },
+                  "keyword": {
+                    "type": "string",
+                    "description": "查询时过滤的关键词，例如：test,查询所有则传空，使用json模式时发挥作用，传空即可。",
+                    "example": ""
+                  },
+                  "jsonQuery": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "key",
+                        "mode",
+                        "value"
+                      ],
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "description": "查询的列名"
+                        },
+                        "mode": {
+                          "type": "string",
+                          "description": "查询的条件：共有三种 =为等于，!=为不等于，～为包含",
+                          "enum": ["=", "!=", "~"]
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "具体的值"
+                        }
                       }
                     },
-                    "required": [
-                      "devboxName",
-                      "tag",
-                      "releaseDes",
-                      "devboxUid"
-                    ]
+                    "description": "使用json模式时的查询参数，例子见下文，查询所有则传空，不启用json模式则传空",
+                    "example": [{"key": "test", "mode": "=", "value": "test"}]
                   }
                 }
-              }
-            }
-          }
-        },
-        "/api/v1/getDevboxListEasyResponse": {
-          "get": {
-            "tags": [
-              "Query"
-            ],
-            "summary": "Get devbox list",
-            "description": "Get all devboxes in the current namespace"
-          }
-        }
-      },
-      "components": {
-        "securitySchemes": {
-          "kubeconfigAuth": {
-            "type": "apiKey",
-            "in": "header",
-            "name": "Authorization",
-            "description": "Kubeconfig for authentication"
-          },
-          "jwtAuth": {
-            "type": "apiKey",
-            "in": "header",
-            "name": "Authorization-Bearer",
-            "description": "JWT token for authentication"
-          }
-        }
-      }
-    },
-    "/api/v1/createDevboxPort": {
-      "post": {
-        "tags": [
-          "Port"
-        ],
-        "summary": "创建devbox端口",
-        "description": "创建devbox端口",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "devboxName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Devbox 名称"
-                  },
-                  "port": {
-                    "type": "number",
-                    "minimum": 1,
-                    "maximum": 65535,
-                    "description": "端口号"
-                  },
-                  "protocol": {
-                    "type": "string",
-                    "enum": [
-                      "HTTP",
-                      "GRPC",
-                      "WS"
-                    ],
-                    "default": "HTTP",
-                    "description": "通信方式：HTTP，GRPC，WS"
-                  }
-                },
-                "required": [
-                  "devboxName",
-                  "port"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/getDevboxListEasyResponse": {
-      "get": {
-        "tags": [
-          "Query"
-        ],
-        "summary": "获取devbox列表",
-        "description": "获取当前namespace中所有的devbox"
-      }
-    },
-    "/api/deployDevbox": {
-      "post": {
-        "tags": [
-          "Deploy"
-        ],
-        "summary": "部署 Devbox",
-        "description": "部署 Devbox",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "devboxName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Devbox 名称"
-                  },
-                  "port": {
-                    "type": "number",
-                    "minimum": 1,
-                    "default": 65535,
-                    "description": "端口号"
-                  },
-                  "tag": {
-                    "type": "string",
-                    "minLength": 1,
-                    "description": "Devbox 标签"
-                  },
-                  "cpu": {
-                    "type": "number",
-                    "minimum": 0,
-                    "default": 2000,
-                    "description": "CPU核心数，使用1000、2000，分别代表1核、2核"
-                  },
-                  "memory": {
-                    "type": "number",
-                    "minimum": 0,
-                    "default": 4096,
-                    "description": "内存大小，使用2048、4096，分别代表2G、4G"
-                  }
-                },
-                "required": [
-                  "devboxName",
-                  "tag"
-                ]
               }
             }
           }

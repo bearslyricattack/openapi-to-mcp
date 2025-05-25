@@ -1,0 +1,282 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "日志查询 API",
+    "description": "用于从 vlogs 中查询日志和日志条目的 API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://path",
+      "description": "API 服务器"
+    }
+  ],
+  "paths": {
+    "/queryLogsByParams": {
+      "post": {
+        "summary": "根据参数查询日志以及条目",
+        "description": "此接口用于根据指定的参数条件从vlogs中查询日志数据。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogQueryRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queryPodList": {
+      "post": {
+        "summary": "查询pod的列表",
+        "description": "此接口用于根据参数查询app下面的全部历史pod",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PodListQueryRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JsonQuery": {
+        "type": "object",
+        "required": [
+          "key",
+          "mode",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "查询的列名"
+          },
+          "mode": {
+            "type": "string",
+            "description": "查询的条件：共有三种 =为等于，!=为不等于，～为包含",
+            "enum": ["=", "!=", "~"]
+          },
+          "value": {
+            "type": "string",
+            "description": "具体的值"
+          }
+        }
+      },
+      "LogQueryRequest": {
+        "type": "object",
+        "required": [
+          "time",
+          "namespace",
+          "app",
+          "limit",
+          "jsonMode",
+          "stderrMode",
+          "numberMode",
+          "pod",
+          "container",
+          "keyword",
+          "jsonQuery"
+        ],
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": "查询的时间范围，例如：1h 表示过去1小时，支持类似 1m, 1d 的格式",
+            "example": "30d"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "查询的命名空间名称，例如：kube-system",
+            "example": "sealos"
+          },
+          "app": {
+            "type": "string",
+            "description": "查询的app",
+            "example": ""
+          },
+          "limit": {
+            "type": "string",
+            "description": "返回的日志条数限制，默认值为 10",
+            "example": "1"
+          },
+          "jsonMode": {
+            "type": "string",
+            "description": "是否开启Json模式 true则开启，false则不开启",
+            "enum": ["true", "false"],
+            "example": "true"
+          },
+          "stderrMode": {
+            "type": "string",
+            "description": "是否只查看stderr，true则开启只查看，false则不开启只查看",
+            "enum": ["true", "false"],
+            "example": "false"
+          },
+          "numberMode": {
+            "type": "string",
+            "description": "是否查询日志条目，true则查看，false则不查看，即查询日志内容，当启用这个参数时，limit参数将不发挥作用。",
+            "enum": ["true", "false"],
+            "example": "false"
+          },
+          "numberLevel": {
+            "type": "string",
+            "description": "查询日志条目的层级，值为m，h，d等 表示日志条目展示的等级，例如传h则表示返回每个小时日志的条目 不过不查询日志等级则传空",
+            "example": ""
+          },
+          "pod": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "需要查询的Pod，传空则查询全部Pod",
+            "example": []
+          },
+          "container": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "需要查询的Container，传空则查询全部Container",
+            "example": []
+          },
+          "keyword": {
+            "type": "string",
+            "description": "查询时过滤的关键词，例如：test,查询所有则传空，使用json模式时发挥作用，传空即可。",
+            "example": ""
+          },
+          "jsonQuery": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonQuery"
+            },
+            "description": "使用json模式时的查询参数，例子见下文，查询所有则传空，不启用json模式则传空",
+            "example": [{"key": "test", "mode": "=", "value": "test"}]
+          }
+        }
+      },
+      "PodListQueryRequest": {
+        "type": "object",
+        "required": [
+          "time",
+          "namespace",
+          "app",
+          "podQuery"
+        ],
+        "properties": {
+          "time": {
+            "type": "string",
+            "description": "查询的时间范围，例如：1h 表示过去1小时，支持类似 1m, 1d 的格式",
+            "example": "30d"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "查询的命名空间名称，例如：kube-system",
+            "example": "ns-70k1ezyv"
+          },
+          "app": {
+            "type": "string",
+            "description": "查询的app",
+            "example": "hello-world"
+          },
+          "podQuery": {
+            "type": "string",
+            "description": "查询pod列表 传true即可",
+            "enum": ["true"],
+            "example": "true"
+          }
+        }
+      },
+      "StandardLogResponse": {
+        "type": "object",
+        "properties": {
+          "_time": {
+            "type": "string",
+            "description": "日志条目的时间戳",
+            "example": "2025-01-10T00:00:02.096451348Z"
+          },
+          "_msg": {
+            "type": "string",
+            "description": "日志消息内容",
+            "example": "{\"level\":\"info\",\"ts\":1736467202.0962029,\"logger\":\"controllers.ClusterPolicy\",\"msg\":\"Sandbox workloads\",\"Enabled\":false,\"DefaultWorkload\":\"container\"}"
+          },
+          "stream": {
+            "type": "string",
+            "description": "流类型（stdout 或 stderr）",
+            "example": "stderr"
+          }
+        }
+      },
+      "JsonLogResponse": {
+        "type": "object",
+        "properties": {
+          "_time": {
+            "type": "string",
+            "description": "日志条目的时间戳",
+            "example": "2025-01-10T00:00:02.096451348Z"
+          },
+          "_msg": {
+            "type": "string",
+            "description": "原始日志消息内容",
+            "example": "{\"level\":\"info\",\"ts\":1736467202.0962029,\"logger\":\"controllers.ClusterPolicy\",\"msg\":\"Sandboxworkloads\",\"Enabled\":false,\"DefaultWorkload\":\"container\"}"
+          },
+          "stream": {
+            "type": "string",
+            "description": "流类型（stdout 或 stderr）",
+            "example": "stderr"
+          },
+          "level": {
+            "type": "string",
+            "description": "日志级别",
+            "example": "info"
+          },
+          "ts": {
+            "type": "string",
+            "description": "日志中的时间戳",
+            "example": "1736467202.0962029"
+          },
+          "logger": {
+            "type": "string",
+            "description": "日志记录器名称",
+            "example": "controllers.ClusterPolicy"
+          },
+          "msg": {
+            "type": "string",
+            "description": "日志消息",
+            "example": "Sandbox workloads"
+          },
+          "Enabled": {
+            "type": "string",
+            "description": "日志中的附加字段",
+            "example": "false"
+          },
+          "DefaultWorkload": {
+            "type": "string",
+            "description": "日志中的附加字段",
+            "example": "container"
+          }
+        }
+      },
+      "LogCountResponse": {
+        "type": "object",
+        "properties": {
+          "_time": {
+            "type": "string",
+            "description": "日志计数的时间戳",
+            "example": "2025-01-09T22:00:00Z"
+          },
+          "logs_total": {
+            "type": "string",
+            "description": "该时间段的日志总数",
+            "example": "44370"
+          }
+        }
+      }
+    }
+  }
+}
